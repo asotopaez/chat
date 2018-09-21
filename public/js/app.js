@@ -71,19 +71,32 @@ $(function(){
   }
 })
 
-(function(document, window, undefined, $){
-  (function(){
-    return Chat = {
+
+
+// (function(document, window, undefined, $ ,io){
+// })(document, window, undefined, jQuery , io);
+
+var ChatIni = function(document, window, undefined, $ ,io){
+  var Chat = {
       apiUrl:'/chat',
       $userDataModal: $('#modalCaptura'),
       $btnMessages: $("#messageText"),
       $userName:'',
+      socket: io(),
 
-      Init: function(){
+      init: function(){
         var self = this
         this.fetchUseInfo(function(user){
           self.renderUser(user)
-
+        })
+        this.watchMessages()
+        // emitir usuario
+        self.socket.on('userJoin', function(user){
+          self.renderUser(user)
+        })
+        // emitir mensaje
+        self.socket.on('message', function(message){
+          self.renderMessage(message)
         })
       },
 
@@ -91,11 +104,12 @@ $(function(){
         var self = this
         this.$userDataModal.openModal()
         var $GuardaInfo = $('.guardaInfo')
-        $guardaInfo.on('cilck',function(){
+        $GuardaInfo.on('click',function(){
           var nombre = $('.nombreUsuario').val()
           var user = [{nombre: nombre, img:'p2.png'}]
-          self.joinUser(user[0])
+          self.socket.emit('userJoin', user[0])
           callback(user)
+          self.joinUser(user[0])
           self.userName = nombre
           self.$userDataModal.closeModal()
         })
@@ -105,7 +119,7 @@ $(function(){
         var self = this
         var endpoint = self.apiUrl + '/users'
         self.ajaxRequest(endpoint,'GET',{})
-        done(function(data){
+        .done(function(data){
           var users = data.current
           self.renderUser(users)
         }).fail(function(err){
@@ -122,10 +136,10 @@ $(function(){
       },
       joinUser: function(user){
         var self = this
-        var endpoint = self.apiUrl + 'users'
+        var endpoint = self.apiUrl + '/users'
         var userObj = {user:user}
         self.ajaxRequest(endpoint,'POST',userObj)
-        done(function(data){
+        .done(function(data){
           console.log(data)
         }).fail(function(err){
           console.log(err)
@@ -141,7 +155,7 @@ $(function(){
                   '<p><img src="image/online.png">En linea</p>'+
                   '</li>'
 
-        user.map(function(user){
+        users.map(function(user){
           var newUser = userTemplate.replace(':image:','p2.jpg')
                         .replace(':nombre:',user.nombre)
 
@@ -149,7 +163,7 @@ $(function(){
       },
       watchMessages: function(){
         var self = this
-        self.$messageText.on('keypress',function(e){
+        self.$btnMessages.on('keypress',function(e){
           if(e.which == 13){
             if($this.val().trim()!=""){
               var message = {
@@ -158,19 +172,21 @@ $(function(){
               }
             }
             self.renderMessage(message)
+            self.socket.emit('message', message)
             $(this).val()
           }else{
             e.preventDefault()
           }
         })
         self.$btnMessages.on('click',function(){
-          if(self.$messageText.val()!=''){
+          if(self.$btnMessages.val()!=''){
             var message = {
               sender: self.userName,
               text: $(this).val()
             }
             self.renderMessage(message)
-            self.$messageText.val('')
+            self.socket.emit('message', message)
+            self.$btnMessages.val('')
           }
         })
 
@@ -201,6 +217,8 @@ $(function(){
         messageList.append(newMessage)
         $(".scroller-chat").animate({ scrollTop : $("scroll-char").get(0).scrollHeight},500)
       }
-    }// end Chat 
-  })
-})
+    }// end Chat
+    Chat.init();
+}
+
+ChatIni(document, window, undefined, jQuery , io);
