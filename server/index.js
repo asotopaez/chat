@@ -1,4 +1,4 @@
-var bodyParser = require('body-parser'),
+const bodyParser = require('body-parser'),
 	http	   = require('http'),
 	express	   = require('express'),
 
@@ -7,7 +7,7 @@ var bodyParser = require('body-parser'),
 	socketio = require('socket.io'),
 	deleteUser = require('./lib')
 
-var port 	   = port = process.env.PORT || 3000,
+const port 	   = process.env.PORT || 3000,
 	app 	   = express(),
 	Server	   = http.createServer(app),
 	io		   = socketio(Server)
@@ -19,31 +19,29 @@ app.use('/chat',chat)
 app.use(express.static('public'))
 
 
-Server.listen(port, function(){
-	console.log("Server is running on port:",port)
-})
+Server.listen(port, () =>{ console.log("Server is running on port:",port) })
 
 
 
 //Funcionalidad del chat con socket
-io.on('connection', function(socket){
+io.on('connection', socket =>{
 	console.log('new user connected, socket '+ socket.id)
 
-	socket.on('userJoin',function(user){
+	socket.on('userJoin', user => {
 		var userarre = []
 		userarre.push(user)
 		socket.user = user
 		socket.broadcast.emit('userJoin',userarre)
 	})
 
-	socket.on('message', function(message){
+	socket.on('message', message => {
 		socket.broadcast.emit('message',message)
 
 	})
 
-	socket.on('disconnect',function(){
+	socket.on('disconnect',() =>{
 		if(socket.hasOwnProperty('user')){
-			deleteUser(socket.user, function(err,confirm){
+			deleteUser(socket.user, err, confirm => {
 				if(err) throw err
 			})
 		}
