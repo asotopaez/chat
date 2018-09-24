@@ -80,7 +80,8 @@ var ChatIni = function(document, window, undefined, $ ,io){
   var Chat = {
       apiUrl:'/chat',
       $userDataModal: $('#modalCaptura'),
-      $btnMessages: $("#messageText"),
+      $textMessages: $("#messageText"),
+      $btnMessages: $("#btnMessage"),
       $userName:'',
       socket: io(),
 
@@ -106,7 +107,7 @@ var ChatIni = function(document, window, undefined, $ ,io){
         var $GuardaInfo = $('.guardaInfo')
         $GuardaInfo.on('click',function(){
           var nombre = $('.nombreUsuario').val()
-          var user = [{nombre: nombre, img:'p2.png'}]
+          var user = [{nombre: nombre, img:'person.png'}]
           self.socket.emit('userJoin', user[0])
           callback(user)
           self.joinUser(user[0])
@@ -148,24 +149,28 @@ var ChatIni = function(document, window, undefined, $ ,io){
       },
       renderUser: function(users){
         var self = this
-        var userlist = $('.user-list')
-        var userTemplate = '<li class="collection-item avatar">'+
-                  '<img src="image/:image:" class="circule">'+
-                  '<span class="title">:nombre:</span>'+
-                  '<p><img src="image/online.png">En linea</p>'+
-                  '</li>'
-
+        var userlist = $('.users-list')
+        var userTemplate = 
+                    '<li class="collection-item">'+
+                      '<div class="avatar">'+
+                        '<div class="imagen">'+
+                          '<img src="image/:image:" alt="Contacto">'+
+                        '</div>'+
+                      '</div>'+
+                      '<span class="title">:nombre:</span>'+
+                      '<p><img src="image/online.png">En linea</p>'+
+                    '</li>'
         users.map(function(user){
-          var newUser = userTemplate.replace(':image:','p2.jpg')
+          var newUser = userTemplate.replace(':image:','person.png')
                         .replace(':nombre:',user.nombre)
-
+          userlist.append(newUser)
         })
       },
       watchMessages: function(){
         var self = this
-        self.$btnMessages.on('keypress',function(e){
+        self.$textMessages.on('keypress',function(e){
           if(e.which == 13){
-            if($this.val().trim()!=""){
+            if($(this).val().trim()!=""){
               var message = {
                 sender: self.userName,
                 text: $(this).val()
@@ -173,20 +178,18 @@ var ChatIni = function(document, window, undefined, $ ,io){
             }
             self.renderMessage(message)
             self.socket.emit('message', message)
-            $(this).val()
-          }else{
-            e.preventDefault()
+            self.$textMessages.val('')
           }
         })
         self.$btnMessages.on('click',function(){
-          if(self.$btnMessages.val()!=''){
+          if(self.$textMessages.val()!=''){
             var message = {
               sender: self.userName,
-              text: $(this).val()
+              text: self.$textMessages.val()
             }
             self.renderMessage(message)
             self.socket.emit('message', message)
-            self.$btnMessages.val('')
+            self.$textMessages.val('')
           }
         })
 
@@ -195,27 +198,28 @@ var ChatIni = function(document, window, undefined, $ ,io){
         var self = this
         var tipoMensaje = message.sender == self.userName ? 'recibidos' : 'enviados'
         var messageList = $('.historial-chat')
-        var messageTeamplate = '<div class=":tipoMensaje:">'+
-                    '<div class="mensaje">'+
-                    '<div class="imagen">'+
-                    '<img src="image/p2.jpg" alt="Contacto"/>'+
-                    '<div>'+
-                    '<div class="texto">'+
-                    '<span class="nombre">:nombre:</span><br>'+
-                    '<span>:mensaje:</span>'+
-                    '</div>'+
-                    '<div class="hora">'+
-                    '<span class="numHora">:hora:</span>'+
-                    '</div>'+
-                    '</div>'+
+        var messageTeamplate = 
+                    '<div class=":tipoMensaje:">'+
+                       '<div class="mensaje">'+
+                         '<div class="imagen">'+
+                          '<img src="image/person.png" alt="Contacto"/>'+
+                        '</div>'+
+                        '<div class="texto">'+
+                          '<span class="nombre">:nombre:</span><br>'+
+                          '<span>:mensaje:</span>'+
+                        '</div>'+
+                        '<div class="hora">'+
+                          '<span class="numHora">:hora:</span>'+
+                        '</div>'+
+                       '</div>'+
                     '</div>';
         var currentDate = new Date()
         var newMessage = messageTeamplate.replace(':tipoMensaje:',tipoMensaje)
                          .replace(':nombre:',message.sender)
                          .replace(':mensaje:',message.text)
-                         .replace(':hora:',currentDate.getHours()+ ":" +current.getMinutes())
+                         .replace(':hora:',currentDate.getHours()+ ":" +currentDate.getMinutes())
         messageList.append(newMessage)
-        $(".scroller-chat").animate({ scrollTop : $("scroll-char").get(0).scrollHeight},500)
+        $(".scroller-chat").animate({ scrollTop : $("scroll-chat").scrollHeight},500)
       }
     }// end Chat
     Chat.init();

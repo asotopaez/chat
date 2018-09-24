@@ -26,12 +26,14 @@ Server.listen(port, function(){
 
 
 //Funcionalidad del chat con socket
-io.on('Connection', function(socket){
+io.on('connection', function(socket){
 	console.log('new user connected, socket '+ socket.id)
 
 	socket.on('userJoin',function(user){
+		var userarre = []
+		userarre.push(user)
 		socket.user = user
-		socket.broadcast.emit('userJoin',user)
+		socket.broadcast.emit('userJoin',userarre)
 	})
 
 	socket.on('message', function(message){

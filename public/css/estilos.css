@@ -100,14 +100,23 @@
   text-align: center;
 }
 .mensaje .texto{
-  width: 70%;
-  margin: 0px 5px;
+  width: 80%;
+  margin: 0px 10px;
 }
 .mensaje .imagen img{
   width: 90%;
   border-radius: 50px;
   border: 1px solid #01266C;
 }
+
+
+.avatar .imagen img{
+  width: 100%;
+  border-radius: 100px;
+  border: 1px solid #01266C;
+}
+
+
 .nombre{
   font-size: 0.9rem;
 }

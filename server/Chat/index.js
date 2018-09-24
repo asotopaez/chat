@@ -26,7 +26,6 @@ router.get("/messages",function(req,res){
 router.post("/users",function(req,res){
     //post usario
     var user = req.body.user
-
     Storage.getData('users')
            .then(function(users){
             return new Promise(function(resolve,reject){
@@ -40,7 +39,6 @@ router.post("/users",function(req,res){
            }).then(function(respons){
               res.json(respons)
            }).catch(function(err){
-              console.log(err)
               res.sendStatus(500).json(err)
            })
 })
@@ -63,6 +61,7 @@ router.post("/messages",function(req,res){
            }).then(function(respons){
               res.json(respons)
            }).catch(function(err){
+              console.log(err)
               res.sendStatus(500).json(err)
            })
 })
